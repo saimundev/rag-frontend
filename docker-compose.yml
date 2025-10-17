@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  app:
+    container_name: stater-project
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/app
+    depends_on:
+      - database
+    env_file:
+      - .env
+
+  database:
+    container_name: stater-project-db
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: stater-project
+    ports:
+      - 3307:3307
+    volumes:
+      - db-data:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    container_name: stater-project-adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  redis:
+    image: redis:7-alpine
+    container_name: stater-project-redis
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+
+volumes:
+  db-data:
+  redis_data:
