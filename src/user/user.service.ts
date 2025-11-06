@@ -56,7 +56,7 @@ export class UserService {
         name: userInfo.name,
         email: userInfo.email,
         password: '',
-        roles: 'USER',
+        roles: 'ADMIN',
       },
     });
     return user;

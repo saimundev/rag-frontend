@@ -8,7 +8,7 @@ export const createUserSchema = z.object({
     .email({ message: 'Invalid email' })
     .nonempty({ message: 'Email is required' }),
   password: z.string().nonempty({ message: 'Password is required' }),
-  role: z.enum(['USER', 'ADMIN']).default('USER'),
+  role: z.enum(['SCORER', 'ADMIN']).default('ADMIN'),
 });
 
 export class CreateUserDto extends createZodDto(createUserSchema) {}

@@ -8,17 +8,194 @@ datasource db {
 }
 
 enum Role {
-  SUPER_ADMIN
   ADMIN
-  USER
+  SCORER
 }
 
 model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
-  password String @default("newPassword")
-  roles Role @default(USER)
+  password  String
+  roles     Role     @default(ADMIN)
   createdAt DateTime @default(now())
 }
 
+model Tournament {
+  id            Int          @id @default(autoincrement())
+  name          String
+  season        String
+  startDate     DateTime
+  endDate       DateTime
+  numberOfTeams Int
+  format        String
+  status        String
+  priseMoney    Float
+  rules         String
+  team          Team[]
+  match         Match[]
+  pointTable    PointTable[]
+  venueId       Int?
+  venue         Venue?       @relation(fields: [venueId], references: [id])
+  createdAt     DateTime     @default(now())
+}
+
+model Team {
+  id             Int          @id @default(autoincrement())
+  name           String
+  captain        String
+  coach          String
+  homeCity       String
+  logoUrl        String
+  points         Int          @default(0)
+  wins           Int          @default(0)
+  losses         Int          @default(0)
+  tournamentId   Int
+  tournament     Tournament   @relation(fields: [tournamentId], references: [id])
+  player         Player[]
+  pointTable     PointTable[]
+  matchesAsTeamA Match[]      @relation("TeamA")
+  matchesAsTeamB Match[]      @relation("TeamB")
+  battingInnings Inning[]     @relation("BattingTeam")
+  bowlingInnings Inning[]     @relation("BowlingTeam")
+  createdAt      DateTime     @default(now())
+}
+
+model Player {
+  id             Int            @id @default(autoincrement())
+  name           String
+  age            Int
+  country        String
+  role           String
+  battingStyle   String
+  bowlingStyle   String
+  imageUrl       String
+  totalRuns      Int            @default(0)
+  totalWickets   Int            @default(0)
+  Statistics     Json
+  teamId         Int
+  team           Team           @relation(fields: [teamId], references: [id])
+  ballsAsBatsman Ball[]         @relation("BallBatsman")
+  ballsAsBowler  Ball[]         @relation("BallBowler")
+  batsmanStats   BatsmanStats[]
+  bowlerStats    BowlerStats[]
+  createdAt      DateTime       @default(now())
+}
+
+model Match {
+  id             Int        @id @default(autoincrement())
+  tournamentName String
+  matchDate      DateTime
+  status         String
+  manOfTheMatch  String
+  tossWinnerTeam String
+  electedTo      String
+  winnerTeam     String
+  tournamentId   Int
+  tournament     Tournament @relation(fields: [tournamentId], references: [id])
+  teamAId        Int
+  teamBId        Int
+  teamA          Team       @relation("TeamA", fields: [teamAId], references: [id])
+  teamB          Team       @relation("TeamB", fields: [teamBId], references: [id])
+  venueId        Int
+  venue          Venue      @relation(fields: [venueId], references: [id])
+  innings        Inning[]
+  createdAt      DateTime   @default(now())
+}
+
+model Venue {
+  id         Int          @id @default(autoincrement())
+  name       String
+  location   String
+  capacity   Int
+  imageUrl   String
+  match      Match[]
+  tournament Tournament[]
+  createdAt  DateTime     @default(now())
+}
+
+model PointTable {
+  id             Int        @id @default(autoincrement())
+  tournamentName String
+  teamName       String
+  matchesPlayed  Int        @default(0)
+  wins           Int        @default(0)
+  losses         Int        @default(0)
+  ties           Int        @default(0)
+  noResults      Int        @default(0)
+  points         Int        @default(0)
+  netRunRate     Float      @default(0)
+  tournamentId   Int
+  tournament     Tournament @relation(fields: [tournamentId], references: [id])
+  teamId         Int
+  team           Team       @relation(fields: [teamId], references: [id])
+  createdAt      DateTime   @default(now())
+}
+
+model Inning {
+  id            Int            @id @default(autoincrement())
+  matchId       Int
+  match         Match          @relation(fields: [matchId], references: [id])
+  inningNumber  Int
+  battingTeamId Int
+  bowlingTeamId Int
+  battingTeam   Team           @relation("BattingTeam", fields: [battingTeamId], references: [id])
+  bowlingTeam   Team           @relation("BowlingTeam", fields: [bowlingTeamId], references: [id])
+  runs          Int            @default(0)
+  wickets       Int            @default(0)
+  overs         Float          @default(0)
+  isPowerPlay   Boolean        @default(false)
+  balls         Ball[]
+  batsmenStats  BatsmanStats[]
+  bowlerStats   BowlerStats[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Ball {
+  id         Int      @id @default(autoincrement())
+  inningId   Int
+  inning     Inning   @relation(fields: [inningId], references: [id])
+  overNumber Int
+  ballNumber Int
+  runs       Int      @default(0)
+  extras     Int      @default(0)
+  isWicket   Boolean  @default(false)
+  wicketInfo Json?
+  batsmanId  Int?
+  bowlerId   Int?
+  batsman    Player?  @relation("BallBatsman", fields: [batsmanId], references: [id])
+  bowler     Player?  @relation("BallBowler", fields: [bowlerId], references: [id])
+  remark     String?
+  createdAt  DateTime @default(now())
+}
+
+model BatsmanStats {
+  id         Int      @id @default(autoincrement())
+  playerId   Int
+  inningId   Int
+  player     Player   @relation(fields: [playerId], references: [id])
+  inning     Inning   @relation(fields: [inningId], references: [id])
+  runs       Int      @default(0)
+  ballsFaced Int      @default(0)
+  totalFours Int      @default(0)
+  totalSixes Int      @default(0)
+  isOnStrike Boolean  @default(false)
+  isOut      Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model BowlerStats {
+  id           Int      @id @default(autoincrement())
+  playerId     Int
+  inningId     Int
+  player       Player   @relation(fields: [playerId], references: [id])
+  inning       Inning   @relation(fields: [inningId], references: [id])
+  oversBowled  Float    @default(0)
+  maidens      Int      @default(0)
+  runsGiven    Int      @default(0)
+  wicketsTaken Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

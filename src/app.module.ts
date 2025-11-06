@@ -10,8 +10,14 @@ import { ConfigModule } from '@nestjs/config';
 import { PaymentModule } from './payment/payment.module';
 import { ChatGateway } from './chat/chat.gateway';
 import { ChatModule } from './chat/chat.module';
-import { ProductModule } from './product/product.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { TournamentModule } from './tournament/tournament.module';
+import { TeamModule } from './team/team.module';
+import { PlayerModule } from './player/player.module';
+import { MatchModule } from './match/match.module';
+import { VenueModule } from './venue/venue.module';
+import { PointTableModule } from './point-table/point-table.module';
+import { ScoreModule } from './score/score.module';
 
 @Module({
   imports: [
@@ -26,7 +32,13 @@ import { ScheduleModule } from '@nestjs/schedule';
     QueueModule,
     PaymentModule,
     ChatModule,
-    ProductModule,
+    TournamentModule,
+    TeamModule,
+    PlayerModule,
+    MatchModule,
+    VenueModule,
+    PointTableModule,
+    ScoreModule,
   ],
   controllers: [],
   providers: [ChatGateway],
